@@ -170,11 +170,11 @@ def calculate_returns(df):
     
 
 
-# Filter the DataFrame for Apple stock
-apple_data = df.xs('AAPL', level='ticker')
+# # Filter the DataFrame for Apple stock
+# apple_data = df.xs('AAPL', level='ticker')
 
-# Display the first few rows of the Apple stock data
-apple_data
+# # Display the first few rows of the Apple stock data
+# apple_data
 
 
 

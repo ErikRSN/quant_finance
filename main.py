@@ -100,6 +100,84 @@ print(df.head())
 # To reduce training time and experiment with features and strategies, we convert the business-daily data to month-end frequency.
 
 
+last_cols = [c for c in df.columns.unique(0) if c not in ['dollar_volume', 'volume', 'open',
+                                                          'high', 'low', 'close']]
+
+data = (pd.concat([df.unstack('ticker')['dollar_volume'].resample('M').mean().stack('ticker').to_frame('dollar_volume'),
+                   df.unstack()[last_cols].resample('M').last().stack('ticker')],
+                  axis=1)).dropna()
+
+data
+
+
+# Calculate 5-year rolling average of dollar volume for each stocks before filtering.
+
+data['dollar_volume'] = (data.loc[:, 'dollar_volume'].unstack('ticker').rolling(5*12, min_periods=12).mean().stack())
+
+data['dollar_vol_rank'] = (data.groupby('date')['dollar_volume'].rank(ascending=False))
+
+# data = data[data['dollar_vol_rank']<150].drop(['dollar_volume', 'dollar_vol_rank'], axis=1)
+
+# data
+
+
+# Calculate Monthly Returns for different time horizons as features.
+
+# To capture time series dynamics that reflect, for example, momentum patterns, we compute historical returns using the method .pct_change(lag), that is, returns over various monthly periods as identified by lags.
+
+
+def calculate_returns(df):
+
+    outlier_cutoff = 0.005
+
+    lags = [1, 2, 3, 6, 9, 12]
+
+    for lag in lags:
+
+        df[f'return_{lag}m'] = (df['adj close']
+                              .pct_change(lag)
+                              .pipe(lambda x: x.clip(lower=x.quantile(outlier_cutoff),
+                                                     upper=x.quantile(1-outlier_cutoff)))
+                              .add(1)
+                              .pow(1/lag)
+                              .sub(1))
+    return df
+    
+    
+# data = data.groupby(level=1, group_keys=False).apply(calculate_returns).dropna()
+
+# data
+
+
+
+
+def calculate_returns(df):
+
+    outlier_cutoff = 0.005
+
+    lags = [1, 2, 3, 6, 9, 12]
+
+    for lag in lags:
+
+        df[f'return_{lag}m'] = (df['adj close']
+                              .pct_change(lag)
+                              .pipe(lambda x: x.clip(lower=x.quantile(outlier_cutoff),
+                                                     upper=x.quantile(1-outlier_cutoff)))
+                              .add(1)
+                              .pow(1/lag)
+                              .sub(1))
+    return df
+    
+
+
+# Filter the DataFrame for Apple stock
+apple_data = df.xs('AAPL', level='ticker')
+
+# Display the first few rows of the Apple stock data
+apple_data
+
+
+
 # ### Visualize the data  
 
 # # Select a specific stock for plotting

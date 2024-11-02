@@ -50,7 +50,7 @@ else:
     # Save to CSV
     df.to_csv(CSV_PATH)
 
-print(df.head())
+# print(df.head())
 
 
 

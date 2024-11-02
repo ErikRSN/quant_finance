@@ -17,6 +17,9 @@ import os
 warnings.filterwarnings('ignore')
 
 
+#   Download/Load SP500 stocks prices data.
+
+
 sp500 = pd.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')[0]
 
 sp500['Symbol'] = sp500['Symbol'].str.replace('.', '-')
@@ -58,7 +61,7 @@ df.columns = df.columns.str.lower()
 df
 
 
-###
+### Calculate features and technical indicators for each stock.
 
 df['garman_klass_vol'] = ((np.log(df['high'])-np.log(df['low']))**2)/2-(2*np.log(2)-1)*((np.log(df['adj close'])-np.log(df['open']))**2)
 
@@ -89,3 +92,25 @@ df['dollar_volume'] = (df['adj close']*df['volume'])/1e6
 
 df
 
+
+print(df.head())
+
+
+# Aggregate to monthly level and filter top 150 most liquid stocks for each month.
+# To reduce training time and experiment with features and strategies, we convert the business-daily data to month-end frequency.
+
+
+# ### Visualize the data  
+
+# # Select a specific stock for plotting
+# stock = 'AAPL'  # Replace with the stock symbol you want to plot
+# stock_data = df.xs(stock, level=1)
+
+# # Plot Garman-Klass Volatility
+# plt.figure(figsize=(14, 7))
+# plt.plot(stock_data.index, stock_data['garman_klass_vol'], label='Garman-Klass Volatility')
+# plt.title(f'{stock} Garman-Klass Volatility')
+# plt.xlabel('Date')
+# plt.ylabel('Volatility')
+# plt.legend()
+# plt.show()
